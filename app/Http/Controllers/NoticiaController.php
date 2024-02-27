@@ -13,23 +13,11 @@ class NoticiaController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {       
-        //criar um dado dentro do bd Redis
-        //Cache::put('site','karineporto.com.br',10);
-        //chave, valor, tempo em segundos para expirar o dado em memoria
-
-        //recuperar o dado dentro do bd redis
-        //$site = Cache::get('site');
-        //echo $site;
-
-        $noticias = [];        
-
-        if(Cache::has('dez_primeiras_noticias')){
-            $noticias = Cache::get('dez_primeiras_noticias');
-        }else{
-            $noticias = Noticia::orderByDesc('created_at')->limit(10)->get();
-            Cache::put('dez_primeiras_noticias', $noticias, 15);
-        }
+    {    
+        $noticias = [];    
+        $noticias = Cache::remember('dez_primeiras_noticias',15, function(){
+            return Noticia::orderByDesc('created_at')->limit(10)->get();
+        });
 
         return view('noticia',['noticias' => $noticias]);
     }
